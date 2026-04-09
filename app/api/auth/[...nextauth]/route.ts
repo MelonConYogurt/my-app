@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 const baseUrl = process.env.APIHOST;
 
 const handler = NextAuth({
+  pages:{signIn: '/login'},
   providers: [
     CredentialsProvider({
       name: "Credentials",
