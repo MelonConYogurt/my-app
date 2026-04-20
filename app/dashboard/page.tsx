@@ -7,14 +7,18 @@ import { Link } from "lucide-react";
 export default function Component() {
   const { data: session, status } = useSession();
 
+  console.log(session);
+
   if (status === "authenticated") {
     return (
       <main>
         <Navbar />
 
-        <p>Signed in as {session?.user?.email ? session.user?.email : "??"}</p>
+        <p>Signed in as {session?.user.email ? session.user?.email : "??"}</p>
 
         <p>Status: {status}</p>
+
+        <p>role: {session.user.role}</p>
       </main>
     );
   }

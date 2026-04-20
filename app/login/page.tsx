@@ -16,29 +16,35 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const router = useRouter();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
+    try {
+      e.preventDefault();
 
-    const response = await signIn("credentials", {
-      redirect: false,
-      email: email,
-      password: password,
-    });
+      const response = await signIn("credentials", {
+        redirect: false,
+        email: email,
+        password: password,
+      });
 
-    if (!response) {
-      console.log("error", response);
-    } else {
-      router.push("/");
+      if (!response?.ok) {
+        if (response?.error) {
+          setError(response.error);
+        }
+        return;
+      }
+      if (response.ok) {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      console.log(error);
     }
-
-    console.log(`Email: ${email}, password: ${password}`);
   }
 
   return (

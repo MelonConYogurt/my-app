@@ -1,11 +1,30 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { DefaultSession } from "next-auth";
+
+declare module "next-auth" {
+  interface Session {
+    user: User & DefaultSession["user"];
+    token: string;
+  }
+
+  interface User {
+    role?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken: string;
+    role?: string;
+  }
+}
+
 const baseUrl = process.env.APIHOST;
 
 const handler = NextAuth({
   pages: { signIn: "/login" },
-
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -39,6 +58,16 @@ const handler = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) token.role = user.role;
+      return token;
+    },
+    session({ session, token }) {
+      session.user.role = token.role;
+      return session;
+    },
+  },
 });
 
 export { handler as GET, handler as POST };
