@@ -20,6 +20,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, FileText, LogOut, BookOpen } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const menuItems = [
   {
@@ -36,28 +37,38 @@ const menuItems = [
 
 export function StudentSidebar() {
   const { data: session } = useSession();
+  const { state } = useSidebar();
   const pathname = usePathname();
   const userEmail = session?.user?.email || "";
 
   const handleLogout = () => {
-    console.log(userEmail, session?.user);
-    // signOut({ callbackUrl: "/login" });
+    signOut({ callbackUrl: "/login" });
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <BookOpen className="h-5 w-5 text-primary-foreground" />
+        {state === "expanded" ? (
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+              <BookOpen className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-sidebar-foreground">
+                EvaluApp
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Panel de estudiante
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-sidebar-foreground">
-              EvaluApp
-            </h2>
-            <p className="text-xs text-muted-foreground">Panel de estudiante</p>
+        ) : (
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex h-auto w-auto p-1 items-center justify-center rounded-lg bg-primary">
+              <BookOpen className="h-5 w-5 text-primary-foreground" />
+            </div>
           </div>
-        </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
@@ -85,32 +96,52 @@ export function StudentSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {}
-            </AvatarFallback>
-          </Avatar>
+        {state === "expanded" ? (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {userEmail?.[0]?.toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
 
-          <div className="flex-1 overflow-hidden">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
-              {userEmail}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {userEmail}
-            </p>
+            <div className="flex-1 overflow-hidden">
+              <p className="truncate text-sm font-medium text-sidebar-foreground">
+                {userEmail}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {userEmail}
+              </p>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="h-8 w-8 shrink-0 cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only">Cerrar sesión</span>
+            </Button>
           </div>
+        ) : (
+          <div className="flex  flex-col items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {userEmail?.[0]?.toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            className="h-8 w-8 shrink-0"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="sr-only">Cerrar sesión</span>
-          </Button>
-        </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="h-8 w-8 shrink-0 cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only">Cerrar sesión</span>
+            </Button>
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

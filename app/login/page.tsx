@@ -24,6 +24,7 @@ export default function Login() {
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     try {
+      setIsLoading(true);
       e.preventDefault();
 
       const response = await signIn("credentials", {
@@ -36,14 +37,17 @@ export default function Login() {
         if (response?.error) {
           setError(response.error);
         }
+        setIsLoading(false);
         return;
       }
       if (response.ok) {
-        router.push("/");
+        setIsLoading(false);
+        router.push(`/dashboard`);
         router.refresh();
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
+      setError(String(error));
     }
   }
 
