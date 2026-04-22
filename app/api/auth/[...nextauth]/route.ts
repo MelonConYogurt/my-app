@@ -21,7 +21,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-const baseUrl = process.env.APIHOST;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const handler = NextAuth({
   pages: { signIn: "/login" },
@@ -42,7 +42,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         //Validate user in the backend
-        const res = await fetch(`${baseUrl}/users/validate`, {
+        const res = await fetch(`${NEXT_PUBLIC_API_URL}/users/validate`, {
           method: "POST",
           body: JSON.stringify(credentials),
           headers: { "Content-Type": "application/json" },
