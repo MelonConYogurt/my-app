@@ -2,6 +2,7 @@
 
 import { User, columns } from "@/components/admin/users-data-table/columns";
 import { DataTable } from "@/components/admin/users-data-table/data-table";
+import { CreateUserDialog } from "@/components/admin/users-data-table/create-user-dialog";
 import { useEffect, useState } from "react";
 import { Users as UsersIcon, ShieldCheck } from "lucide-react";
 
@@ -82,11 +83,14 @@ function Users() {
         </section>
 
         <section className="rounded-md border bg-background shadow-sm p-4 md:p-6">
-          <div className="mb-5">
-            <h2 className="font-semibold text-lg">Listado de usuarios</h2>
-            <p className="text-sm text-muted-foreground">
-              Consulta y gestiona la información disponible.
-            </p>
+          <div className="mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <h2 className="font-semibold text-lg">Listado de usuarios</h2>
+              <p className="text-sm text-muted-foreground">
+                Consulta y gestiona la información disponible.
+              </p>
+            </div>
+            <CreateUserDialog />
           </div>
 
           <DataTable columns={columns} data={data} />
