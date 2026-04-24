@@ -51,25 +51,30 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        {state === "expanded" ? (
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-sidebar-foreground">
-                EvaluApp
-              </h2>
-              <p className="text-xs text-muted-foreground">Panel de admin</p>
-            </div>
+        <div
+          className={`flex items-center transition-all duration-300 ${
+            state === "expanded" ? "gap-3 justify-start" : "justify-center"
+          }`}
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shrink-0">
+            <GraduationCap className="h-5 w-5 text-primary-foreground" />
           </div>
-        ) : (
-          <div className="flex items-center justify-center gap-3">
-            <div className="flex h-auto w-auto p-1 items-center justify-center rounded-lg bg-primary">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
-            </div>
+
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              state === "expanded"
+                ? "w-auto opacity-100 ml-0"
+                : "w-0 opacity-0 ml-0"
+            }`}
+          >
+            <h2 className="text-lg font-semibold text-sidebar-foreground whitespace-nowrap">
+              EvaluApp
+            </h2>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">
+              Panel de admin
+            </p>
           </div>
-        )}
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
