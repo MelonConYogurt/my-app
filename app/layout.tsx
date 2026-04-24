@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "./utils/nextauth-session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <AuthProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </AuthProvider>
+        <Toaster />
       </body>
     </html>
   );

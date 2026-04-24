@@ -11,8 +11,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function AlertDialogDeleteUser({ _id }: { _id: string }) {
+  const router = useRouter();
+
   async function deleteUser(_id: string) {
     try {
       const res = await fetch(
@@ -24,10 +28,11 @@ export function AlertDialogDeleteUser({ _id }: { _id: string }) {
       );
 
       if (res.ok) {
-        console.log("Usuario eliminado");
+        toast.success("Usuario eliminado correctamente");
+        router.refresh();
       }
     } catch (error) {
-      console.log(error);
+      toast.error(String(error));
     }
   }
 

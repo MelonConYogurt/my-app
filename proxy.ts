@@ -22,7 +22,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (pathname === "/dashboard") {
+  if (pathname === "/dashboard" || pathname === "/") {
     switch (token.role) {
       case "admin":
         return NextResponse.redirect(new URL("/admin", request.url));
@@ -52,6 +52,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/login",
     "/admin/:path*",
     "/student/:path*",

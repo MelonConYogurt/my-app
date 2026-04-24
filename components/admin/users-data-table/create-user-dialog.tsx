@@ -12,9 +12,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export function CreateUserDialog() {
   const [open, setOpen] = useState(false);
@@ -24,20 +35,30 @@ export function CreateUserDialog() {
     name: "",
     email: "",
     password: "",
-    role: "student",
+    role: "",
   });
 
-  const handleChange = (
+  const router = useRouter();
+
+  function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  ) {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  function handleSelectChange(value: string) {
+    setFormData((prev) => ({
+      ...prev,
+      role: value,
+    }));
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -56,25 +77,31 @@ export function CreateUserDialog() {
         return;
       }
 
-      // Limpiar formulario y cerrar dialog
-      setFormData({ name: "", email: "", password: "" });
-      setOpen(false);
+      toast.success("Usuario creado correctamente");
+      router.refresh();
 
-      // Recargar la página para ver el nuevo usuario
-      window.location.reload();
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        role: "",
+      });
+
+      setOpen(false);
     } catch (error) {
       setError("Error al crear usuario");
       console.log(error);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">Crear usuario</Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Crear nuevo usuario</DialogTitle>
@@ -82,6 +109,7 @@ export function CreateUserDialog() {
             Completa los campos para crear un nuevo usuario en el sistema.
           </DialogDescription>
         </DialogHeader>
+
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
@@ -95,6 +123,7 @@ export function CreateUserDialog() {
                 required
               />
             </Field>
+
             <Field>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -107,6 +136,7 @@ export function CreateUserDialog() {
                 required
               />
             </Field>
+
             <Field>
               <Label htmlFor="password">Contraseña</Label>
               <Input
@@ -119,32 +149,44 @@ export function CreateUserDialog() {
                 required
               />
             </Field>
-            <Field>
+
+            <Field className="w-full">
               <Label htmlFor="role">Rol</Label>
-              <select
-                id="role"
-                name="role"
+
+              <Select
                 value={formData.role}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onValueChange={handleSelectChange}
+                required
               >
-                <option value="student">Estudiante</option>
-                <option value="docent">Docente</option>
-                <option value="admin">Administrador</option>
-              </select>
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    <SelectLabel>Rol</SelectLabel>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="student">Estudiante</SelectItem>
+                    <SelectItem value="docent">Docente</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Field>
+
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+              <div className="rounded bg-red-50 p-2 text-sm text-red-600">
                 {error}
               </div>
             )}
           </FieldGroup>
+
           <DialogFooter className="mt-6">
             <DialogClose asChild>
               <Button variant="outline" disabled={loading}>
                 Cancelar
               </Button>
             </DialogClose>
+
             <Button type="submit" disabled={loading}>
               {loading ? "Creando..." : "Crear usuario"}
             </Button>

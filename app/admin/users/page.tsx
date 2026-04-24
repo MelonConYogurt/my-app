@@ -3,41 +3,53 @@
 import { User, columns } from "@/components/admin/users-data-table/columns";
 import { DataTable } from "@/components/admin/users-data-table/data-table";
 import { CreateUserDialog } from "@/components/admin/users-data-table/create-user-dialog";
-import { useEffect, useState } from "react";
-import { Users as UsersIcon, ShieldCheck } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Users as UsersIcon, ShieldCheck, RefreshCw } from "lucide-react";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 function Users() {
   const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch(`${NEXT_PUBLIC_API_URL}/users`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const { message, data } = await res.json();
+
+      console.log(message);
+
+      if (res.ok) {
+        setData(data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [NEXT_PUBLIC_API_URL]);
 
   useEffect(() => {
-    const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch(`${NEXT_PUBLIC_API_URL}/users`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const { message, data } = await res.json();
-
-        console.log(message);
-
-        if (res.ok) {
-          setData(data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
+
+  function handleRefresh() {
+    fetchUsers();
+    toast.success("Se han actulizado los datos");
+  }
 
   return (
     <main className="bg-muted/30 min-h-screen">
@@ -90,7 +102,18 @@ function Users() {
                 Consulta y gestiona la información disponible.
               </p>
             </div>
-            <CreateUserDialog />
+
+            <div className="flex gap-5 justify-center items-center">
+              <CreateUserDialog />
+
+              <Button
+                variant="outline"
+                onClick={handleRefresh}
+                disabled={loading}
+              >
+                <RefreshCw className={loading ? "animate-spin" : ""} />
+              </Button>
+            </div>
           </div>
 
           <DataTable columns={columns} data={data} />
