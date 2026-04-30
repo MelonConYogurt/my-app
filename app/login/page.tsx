@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Mail, Lock } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -40,6 +40,7 @@ export default function Login() {
         setIsLoading(false);
         return;
       }
+
       if (response.ok) {
         setIsLoading(false);
         router.push(`/dashboard`);
@@ -52,63 +53,87 @@ export default function Login() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-gray-600 font-bold text-4xl">
             Sistema de Evaluación de Propuestas y Entregables
           </p>
         </div>
-        <Card className="border-border bg-card">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl text-foreground">
-              Iniciar Sesión
-            </CardTitle>
-            <CardDescription>
+
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="text-center rounded-t-lg">
+            <CardTitle className="text-2xl font-bold">Iniciar Sesión</CardTitle>
+            <CardDescription className="mt-2">
               Ingresa tus credenciales para acceder al sistema
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {error && (
-                <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4" />
+                <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive animate-pulse">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
               )}
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="correo@universidad.edu"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-secondary"
-                />
+                <Label htmlFor="email" className="font-semibold text-gray-700">
+                  Correo electrónico
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="correo@universidad.edu"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="pl-10 bg-gray-50 border-gray-200"
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="********"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-secondary"
-                />
+                <Label
+                  htmlFor="password"
+                  className="font-semibold text-gray-700"
+                >
+                  Contraseña
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="********"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="pl-10 bg-gray-50 border-gray-200"
+                  />
+                </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full mt-4 font-semibold py-2 h-auto"
+                disabled={isLoading}
+              >
                 {isLoading ? "Ingresando..." : "Ingresar"}
               </Button>
             </form>
           </CardContent>
         </Card>
+
+        <div className="mt-6 text-center text-sm text-gray-600">
+          <p>¿Problemas para ingresar?</p>
+          <p className="text-gray-500 text-xs mt-2">
+            Contacta con el administrador del sistema
+          </p>
+        </div>
       </div>
     </main>
   );

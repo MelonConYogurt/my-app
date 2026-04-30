@@ -19,7 +19,7 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, LogOut, BookOpen } from "lucide-react";
+import { LayoutDashboard, LogOut, BookOpen, Users } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -29,9 +29,14 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Mis cursos",
-    url: "/docent/cursos",
+    title: "Entregables",
+    url: "/docent/deliverable",
     icon: BookOpen,
+  },
+  {
+    title: "Estudiantes",
+    url: "/docent/students",
+    icon: Users,
   },
 ];
 
@@ -85,7 +90,7 @@ export function DocentSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname.startsWith(item.url)}
+                    isActive={pathname === item.url}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>

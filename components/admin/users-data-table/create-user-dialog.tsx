@@ -158,7 +158,7 @@ export function CreateUserDialog() {
                 onValueChange={handleSelectChange}
                 required
               >
-                <SelectTrigger className="w-full max-w-48">
+                <SelectTrigger className="w-full ">
                   <SelectValue placeholder="Selecciona" />
                 </SelectTrigger>
 

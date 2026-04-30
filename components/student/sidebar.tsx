@@ -85,7 +85,7 @@ export function StudentSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname.startsWith(item.url)}
+                    isActive={pathname === item.url}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>

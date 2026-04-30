@@ -11,6 +11,7 @@ declare module "next-auth" {
 
   interface User {
     role?: string;
+    id?: string;
   }
 }
 
@@ -18,6 +19,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     accessToken: string;
     role?: string;
+    id?: string;
   }
 }
 
@@ -41,29 +43,30 @@ const handler = NextAuth({
         },
       },
       async authorize(credentials) {
-        //Validate user in the backend
         const res = await fetch(`${NEXT_PUBLIC_API_URL}/users/validate`, {
           method: "POST",
           body: JSON.stringify(credentials),
           headers: { "Content-Type": "application/json" },
         });
         const user = await res.json();
-        // If no error and we have user data, return it
         if (res.ok && user) {
           return user;
         }
-        // Return null if user data could not be retrieved
         return null;
       },
     }),
   ],
   callbacks: {
     jwt({ token, user }) {
-      if (user) token.role = user.role;
+      if (user) {
+        token.role = user.role;
+        token.id = user.id;
+      }
       return token;
     },
     session({ session, token }) {
       session.user.role = token.role;
+      session.user.id = token.id;
       return session;
     },
   },
