@@ -61,7 +61,7 @@ function DelivareDocent() {
 
   return (
     <main className="bg-muted/30 min-h-screen">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sticky top-0 bg-white">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-auto" />
         <h1 className="text-lg font-semibold">Entregables</h1>
@@ -115,11 +115,14 @@ function DelivareDocent() {
               <CreateDeliverableDialog />
 
               <Button
-                variant="outline"
                 onClick={handleRefresh}
+                variant="outline"
                 disabled={loading}
               >
-                <RefreshCw className={loading ? "animate-spin" : ""} />
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                />
+                Actualizar
               </Button>
             </div>
           </div>

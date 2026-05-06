@@ -19,7 +19,13 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, LogOut, BookOpen, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  BookOpen,
+  Users,
+  ClipboardCheck,
+} from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -37,6 +43,11 @@ const menuItems = [
     title: "Estudiantes",
     url: "/docent/students",
     icon: Users,
+  },
+  {
+    title: "Rubricas",
+    url: "/docent/rubrics",
+    icon: ClipboardCheck,
   },
 ];
 

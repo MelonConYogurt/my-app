@@ -27,6 +27,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
+// 👇 Importa iconos
+import { User, Mail, Lock, Shield, Loader2, PlusCircle } from "lucide-react";
+
 export function CreateUserDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -99,12 +102,18 @@ export function CreateUserDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Crear usuario</Button>
+        <Button variant="outline" className="flex items-center gap-2">
+          <PlusCircle className="h-4 w-4" />
+          Crear usuario
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Crear nuevo usuario</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Crear nuevo usuario
+          </DialogTitle>
           <DialogDescription>
             Completa los campos para crear un nuevo usuario en el sistema.
           </DialogDescription>
@@ -112,8 +121,12 @@ export function CreateUserDialog() {
 
         <form onSubmit={handleSubmit}>
           <FieldGroup>
+            {/* Nombre */}
             <Field>
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Nombre
+              </Label>
               <Input
                 id="name"
                 name="name"
@@ -124,8 +137,12 @@ export function CreateUserDialog() {
               />
             </Field>
 
+            {/* Email */}
             <Field>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -137,8 +154,12 @@ export function CreateUserDialog() {
               />
             </Field>
 
+            {/* Password */}
             <Field>
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password" className="flex items-center gap-2">
+                <Lock className="h-4 w-4" />
+                Contraseña
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -150,32 +171,37 @@ export function CreateUserDialog() {
               />
             </Field>
 
+            {/* Rol */}
             <Field className="w-full">
-              <Label htmlFor="role">Rol</Label>
+              <Label htmlFor="role" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Rol
+              </Label>
 
               <Select
                 value={formData.role}
                 onValueChange={handleSelectChange}
                 required
               >
-                <SelectTrigger className="w-full ">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecciona" />
                 </SelectTrigger>
 
                 <SelectContent position="popper">
                   <SelectGroup>
                     <SelectLabel>Rol</SelectLabel>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="student">Estudiante</SelectItem>
-                    <SelectItem value="docent">Docente</SelectItem>
+                    <SelectItem value="admin">🛡️ Administrador</SelectItem>
+                    <SelectItem value="student">🎓 Estudiante</SelectItem>
+                    <SelectItem value="docent">📘 Docente</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </Field>
 
+            {/* Error */}
             {error && (
               <div className="rounded bg-red-50 p-2 text-sm text-red-600">
-                {error}
+                ⚠️ {error}
               </div>
             )}
           </FieldGroup>
@@ -187,7 +213,12 @@ export function CreateUserDialog() {
               </Button>
             </DialogClose>
 
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? "Creando..." : "Crear usuario"}
             </Button>
           </DialogFooter>

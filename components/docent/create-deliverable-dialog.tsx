@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import {
+  Plus,
+  User,
+  FileText,
+  AlignLeft,
+  Calendar,
+  Loader2,
+} from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -17,13 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import Select, { SingleValue } from "react-select";
 import { Textarea } from "@/components/ui/textarea";
 
 interface User {
@@ -33,13 +35,18 @@ interface User {
   role: string;
 }
 
+interface Option {
+  label: string;
+  value: string;
+}
+
 export function CreateDeliverableDialog() {
   const { data: session } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
+  const [options, setOptions] = useState<Option[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -59,15 +66,17 @@ export function CreateDeliverableDialog() {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/users?active=true&role=student`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        },
       );
 
       if (res.ok) {
         const data = await res.json();
-        setUsers(data.data);
+
+        const options = data.data.map((user: User) => ({
+          label: user.name,
+          value: user._id,
+        }));
+
+        setOptions(options);
       } else {
         toast.error("Error al cargar usuarios");
       }
@@ -89,11 +98,12 @@ export function CreateDeliverableDialog() {
     }));
   };
 
-  const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      userId: value,
-    }));
+  const handleSelectChange = (option: SingleValue<Option>) => {
+    if (option) {
+      setFormData((prev) => ({ ...prev, userId: option.value }));
+    }
+
+    console.log("Seleccionado:", option);
   };
 
   const handleSubmit = async () => {
@@ -114,27 +124,19 @@ export function CreateDeliverableDialog() {
 
     setLoading(true);
     try {
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        dueDate: formData.dueDate,
-        userId: formData.userId,
-        docentId: session.user.id,
-      };
-
-      console.log("Enviando payload:", payload);
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/deliverables`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            ...formData,
+            docentId: session.user.id,
+          }),
         },
       );
 
       const data = await res.json();
-      console.log("Respuesta del servidor:", data);
 
       if (res.ok) {
         toast.success("Entregable creado correctamente");
@@ -151,59 +153,57 @@ export function CreateDeliverableDialog() {
       }
     } catch (error) {
       toast.error(String(error));
-      console.error("Error completo:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}> 
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2" variant={"outline"}>
+        <Button className="gap-2" variant="outline">
           <Plus size={18} />
           Crear Entregable
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Crear Nuevo Entregable</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Crear Nuevo Entregable
+          </DialogTitle>
           <DialogDescription>
             Completa los siguientes campos para crear un nuevo entregable
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4 w-full ">
+        <div className="space-y-4 py-4 w-full">
           <div className="space-y-2 w-full">
-            <Label htmlFor="userId">Estudiante</Label>
+            <Label htmlFor="userId" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Estudiante
+            </Label>
             <Select
-              value={formData.userId}
-              onValueChange={handleSelectChange}
-              disabled={loadingUsers}
-            >
-              <SelectTrigger id="userId" className="w-full">
-                <SelectValue
-                  placeholder={
-                    loadingUsers
-                      ? "Cargando estudiantes..."
-                      : "Selecciona un estudiante"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {users.map((user) => (
-                  <SelectItem key={user._id} value={user._id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              styles={{
+                control: (baseStyles) => ({
+                  ...baseStyles,
+                  borderRadius: "0.5rem",
+                }),
+              }}
+              onChange={handleSelectChange}
+              options={options}
+              isDisabled={loadingUsers}
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="title">Título</Label>
+            <Label className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Título
+            </Label>
             <Input
-              id="title"
               name="title"
               placeholder="Ej: Proyecto Final"
               value={formData.title}
@@ -212,9 +212,11 @@ export function CreateDeliverableDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción</Label>
+            <Label className="flex items-center gap-2">
+              <AlignLeft className="h-4 w-4" />
+              Descripción
+            </Label>
             <Textarea
-              id="description"
               name="description"
               placeholder="Ej: Crear un sitio web responsivo"
               value={formData.description}
@@ -223,9 +225,11 @@ export function CreateDeliverableDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dueDate">Fecha de Entrega</Label>
+            <Label className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Fecha de Entrega
+            </Label>
             <Input
-              id="dueDate"
               name="dueDate"
               type="datetime-local"
               value={formData.dueDate}
@@ -242,7 +246,13 @@ export function CreateDeliverableDialog() {
           >
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={loading}>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {loading ? "Guardando..." : "Crear Entregable"}
           </Button>
         </DialogFooter>

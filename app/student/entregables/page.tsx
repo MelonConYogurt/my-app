@@ -4,7 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Calendar, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import {
+  FileText,
+  Calendar,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+} from "lucide-react";
 import { toast } from "sonner";
 import { DeliverableCard } from "@/components/student/deliverable-card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -40,7 +46,7 @@ export default function StudentDeliverables() {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const { message, data } = await res.json();
@@ -97,15 +103,15 @@ export default function StudentDeliverables() {
   };
 
   const pendingCount = deliverables.filter(
-    (d) => d.status === "pending"
+    (d) => d.status === "pending",
   ).length;
   const submittedCount = deliverables.filter(
-    (d) => d.status === "submitted"
+    (d) => d.status === "submitted",
   ).length;
 
   return (
     <main className="bg-muted/30 min-h-screen">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sticky top-0 bg-white">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-auto" />
         <h1 className="text-lg font-semibold">Mis Entregables</h1>
@@ -129,7 +135,8 @@ export default function StudentDeliverables() {
                   {deliverables.length} entregables
                 </h1>
                 <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                  Sigue el progreso de tus entregas y entrega tus trabajos a tiempo.
+                  Sigue el progreso de tus entregas y entrega tus trabajos a
+                  tiempo.
                 </p>
               </div>
 
@@ -175,7 +182,9 @@ export default function StudentDeliverables() {
           ) : deliverables.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-              <p className="text-muted-foreground">No tienes entregables asignados aún</p>
+              <p className="text-muted-foreground">
+                No tienes entregables asignados aún
+              </p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

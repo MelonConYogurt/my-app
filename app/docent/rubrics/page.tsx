@@ -1,32 +1,41 @@
 "use client";
 
-import { User, columns } from "@/components/admin/users-data-table/columns";
-import { DataTable } from "@/components/admin/users-data-table/data-table";
-import { CreateUserDialog } from "@/components/admin/users-data-table/create-user-dialog";
+import { Rubric } from "@/components/docent/rubrics-data-table/rubrics-columns";
+import { DataTable } from "@/components/docent/rubrics-data-table/rubrics-data-table";
+import { CreateRubricDialog } from "@/components/docent/rubrics-data-table/create-rubric-dialog";
 import { useEffect, useState, useCallback } from "react";
-import { Users as UsersIcon, ShieldCheck, RefreshCw } from "lucide-react";
+import { BookOpen, RefreshCw } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { columns } from "@/components/docent/rubrics-data-table/rubrics-columns";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-function Users() {
-  const [data, setData] = useState<User[]>([]);
+function Rubrics() {
+  const [data, setData] = useState<Rubric[]>([]);
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
 
   const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const docentId = session?.user.id || "";
 
-  const fetchUsers = useCallback(async () => {
+  const fetchRubrics = useCallback(async () => {
+    if (!docentId) return;
+
     try {
       setLoading(true);
 
-      const res = await fetch(`${NEXT_PUBLIC_API_URL}/users`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${NEXT_PUBLIC_API_URL}/rubrics?docentId=${docentId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const { message, data } = await res.json();
 
@@ -37,26 +46,27 @@ function Users() {
       }
     } catch (error) {
       console.log(error);
+      toast.error("Error al cargar las rúbricas");
     } finally {
       setLoading(false);
     }
-  }, [NEXT_PUBLIC_API_URL]);
+  }, [NEXT_PUBLIC_API_URL, docentId]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchRubrics();
+  }, [fetchRubrics]);
 
   function handleRefresh() {
-    fetchUsers();
-    toast.success("Se han actulizado los datos");
+    fetchRubrics();
+    toast.success("Se han actualizado los datos");
   }
 
   return (
     <main className="bg-muted/30 min-h-screen">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sticky top-0 bg-white">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 sticky top-0 bg-white ">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-auto" />
-        <h1 className="text-lg font-semibold">Users</h1>
+        <h1 className="text-lg font-semibold">Rúbricas</h1>
       </header>
 
       <section className="p-6">
@@ -66,27 +76,28 @@ function Users() {
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                    <UsersIcon className="w-5 h-5" />
+                    <BookOpen className="w-5 h-5" />
                   </div>
 
                   <span className="text-sm font-medium text-muted-foreground">
-                    Panel administrativo
+                    Gestión académica
                   </span>
                 </div>
 
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  Control de usuarios
+                  Control de rúbricas
                 </h1>
 
                 <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                  Administra cuentas, permisos y estado de los usuarios
-                  registrados en la plataforma.
+                  Crea y administra rúbricas de evaluación para tus entregables.
                 </p>
               </div>
 
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl border bg-muted/40">
-                <ShieldCheck className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium">Sistema seguro</span>
+                <BookOpen className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium">
+                  {data.length} rúbricas
+                </span>
               </div>
             </div>
 
@@ -97,15 +108,13 @@ function Users() {
         <section className="rounded-md border bg-background shadow-sm p-4 md:p-6">
           <div className="mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <h2 className="font-semibold text-lg">Listado de usuarios</h2>
-              <p className="text-sm text-muted-foreground">
-                Consulta y gestiona la información disponible.
+              <h2 className="font-semibold text-lg">Listado de rúbricas</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Administra todas tus rúbricas de evaluación
               </p>
             </div>
 
-            <div className="flex gap-5 justify-center items-center">
-              <CreateUserDialog />
-
+            <div className="flex gap-2">
               <Button
                 onClick={handleRefresh}
                 variant="outline"
@@ -116,6 +125,8 @@ function Users() {
                 />
                 Actualizar
               </Button>
+
+              <CreateRubricDialog docentId={docentId} />
             </div>
           </div>
 
@@ -126,4 +137,4 @@ function Users() {
   );
 }
 
-export default Users;
+export default Rubrics;
