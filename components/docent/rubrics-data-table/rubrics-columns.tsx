@@ -61,17 +61,14 @@ export const columns: ColumnDef<Rubric>[] = [
       const { criterions } = row.original;
 
       return (
-        <div className="max-w-75">
+        <div>
           <Accordion type="single" collapsible>
             <AccordionItem value="criterions" className="border-none">
               <AccordionTrigger className="py-2 text-sm hover:no-underline">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                   <span className="font-medium">
                     {criterions.length} criterios
                   </span>
-                  <Badge variant="outline">
-                    {criterions.reduce((acc, c) => acc + c.value, 0)} pts
-                  </Badge>
                 </div>
               </AccordionTrigger>
 
@@ -80,7 +77,7 @@ export const columns: ColumnDef<Rubric>[] = [
                   <div key={index} className="rounded-md border-b p-2 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{criterion.name}</span>
-                      <Badge variant="secondary">{criterion.value}</Badge>
+                      <Badge variant="secondary">{criterion.value} %</Badge>
                     </div>
 
                     <p className="text-xs text-muted-foreground mt-1">

@@ -1,6 +1,6 @@
 "use client";
 
-import { CreateDeliverableDialog } from "@/components/docent/create-deliverable-dialog";
+import { CreateDeliverableDialog } from "@/components/docent/deliverables-data-table/create-deliverable-dialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";

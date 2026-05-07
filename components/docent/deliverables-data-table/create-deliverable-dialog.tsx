@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import {
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -27,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Select, { SingleValue } from "react-select";
 import { Textarea } from "@/components/ui/textarea";
+import { Rubric } from "../rubrics-data-table/edit-rubric-dialog";
 
 interface User {
   _id: string;
@@ -43,26 +45,23 @@ interface Option {
 export function CreateDeliverableDialog() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingRubrics, setLoadingRubrics] = useState(false);
   const [options, setOptions] = useState<Option[]>([]);
+  const [rubricOptions, setRubricOptions] = useState<Option[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     dueDate: "",
     userId: "",
+    rubricId: "",
   });
 
-  useEffect(() => {
-    if (open) {
-      fetchActiveUsers();
-    }
-  }, [open]);
-
-  const fetchActiveUsers = async () => {
+  const fetchActiveUsers = useCallback(async () => {
     setLoadingUsers(true);
+
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/users?active=true&role=student`,
@@ -86,7 +85,42 @@ export function CreateDeliverableDialog() {
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, []);
+
+  const fetchRubrics = useCallback(async () => {
+    setLoadingRubrics(true);
+
+    try {
+      if (!session?.user?.id) return;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/rubrics?docentId=${session.user.id}`,
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+
+        const options = data.data.map((rubric: Rubric) => ({
+          label: rubric.title,
+          value: rubric._id,
+        }));
+
+        setRubricOptions(options);
+      } else {
+        toast.error("Error al cargar rúbricas");
+      }
+    } catch (error) {
+      toast.error("Error al cargar rúbricas");
+      console.error(error);
+    } finally {
+      setLoadingRubrics(false);
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    fetchActiveUsers();
+    fetchRubrics();
+  }, [fetchActiveUsers, fetchRubrics]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -102,8 +136,12 @@ export function CreateDeliverableDialog() {
     if (option) {
       setFormData((prev) => ({ ...prev, userId: option.value }));
     }
+  };
 
-    console.log("Seleccionado:", option);
+  const handleRubricSelectChange = (option: SingleValue<Option>) => {
+    if (option) {
+      setFormData((prev) => ({ ...prev, rubricId: option.value }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -111,7 +149,8 @@ export function CreateDeliverableDialog() {
       !formData.title ||
       !formData.description ||
       !formData.dueDate ||
-      !formData.userId
+      !formData.userId ||
+      !formData.rubricId
     ) {
       toast.error("Por favor completa todos los campos");
       return;
@@ -145,8 +184,8 @@ export function CreateDeliverableDialog() {
           description: "",
           dueDate: "",
           userId: "",
+          rubricId: "",
         });
-        setOpen(false);
         router.refresh();
       } else {
         toast.error(data.message || "Error al crear entregable");
@@ -160,7 +199,7 @@ export function CreateDeliverableDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button className="gap-2" variant="default">
           <Plus size={18} />
@@ -195,6 +234,24 @@ export function CreateDeliverableDialog() {
               onChange={handleSelectChange}
               options={options}
               isDisabled={loadingUsers}
+            />
+          </div>
+
+          <div className="space-y-2 w-full">
+            <Label htmlFor="rubricId" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Rúbrica
+            </Label>
+            <Select
+              styles={{
+                control: (baseStyles) => ({
+                  ...baseStyles,
+                  borderRadius: "0.5rem",
+                }),
+              }}
+              onChange={handleRubricSelectChange}
+              options={rubricOptions}
+              isDisabled={loadingRubrics}
             />
           </div>
 
@@ -239,14 +296,9 @@ export function CreateDeliverableDialog() {
         </div>
 
         <DialogFooter>
-          <Button
-            variant="default"
-            onClick={() => setOpen(false)}
-            disabled={loading}
-          >
-            Cancelar
-          </Button>
-
+          <DialogClose asChild>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
           <Button
             onClick={handleSubmit}
             disabled={loading}
