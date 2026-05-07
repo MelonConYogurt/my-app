@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { AlertDialogDeleteUser } from "@/components/admin/users-data-table/delete-dialog";
+import { EditUserDialog } from "@/components/admin/users-data-table/edit-user-dialog";
 
 export type User = {
   _id: string;
@@ -105,6 +106,7 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
+    header: "Acciones",
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
@@ -121,10 +123,8 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
 
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user._id)}
-            >
-              Copiar ID
+            <DropdownMenuItem asChild>
+              <EditUserDialog user={user} />
             </DropdownMenuItem>
 
             <DropdownMenuItem asChild>

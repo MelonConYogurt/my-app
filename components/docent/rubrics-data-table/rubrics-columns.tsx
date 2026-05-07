@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { AlertDialogDeleteRubric } from "@/components/docent/rubrics-data-table/delete-rubric-dialog";
+import {
+  EditRubricDialog,
+  type Rubric,
+} from "@/components/docent/rubrics-data-table/edit-rubric-dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -19,19 +23,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-export type Rubric = {
-  _id: string;
-  title: string;
-  description: string;
-  docentId: string;
-  criterions: Array<{
-    _id?: string;
-    name: string;
-    value: number;
-    description: string;
-  }>;
-  createdAt?: string;
-};
+export { type Rubric };
 
 export const columns: ColumnDef<Rubric>[] = [
   {
@@ -121,10 +113,8 @@ export const columns: ColumnDef<Rubric>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
 
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(rubric._id)}
-            >
-              Copiar ID
+            <DropdownMenuItem asChild>
+              <EditRubricDialog rubric={rubric} />
             </DropdownMenuItem>
 
             <DropdownMenuItem asChild>
