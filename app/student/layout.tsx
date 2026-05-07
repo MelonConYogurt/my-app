@@ -9,7 +9,7 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <StudentSidebar />
       <SidebarInset className="bg-background">{children}</SidebarInset>
     </SidebarProvider>

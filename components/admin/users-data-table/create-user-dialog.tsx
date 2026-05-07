@@ -102,7 +102,7 @@ export function CreateUserDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="default" className="flex items-center gap-2">
           <PlusCircle className="h-4 w-4" />
           Crear usuario
         </Button>
@@ -208,7 +208,7 @@ export function CreateUserDialog() {
 
           <DialogFooter className="mt-6">
             <DialogClose asChild>
-              <Button variant="outline" disabled={loading}>
+              <Button variant="default" disabled={loading}>
                 Cancelar
               </Button>
             </DialogClose>

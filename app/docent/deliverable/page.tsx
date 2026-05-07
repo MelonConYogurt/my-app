@@ -116,7 +116,7 @@ function DelivareDocent() {
 
               <Button
                 onClick={handleRefresh}
-                variant="outline"
+                variant="default"
                 disabled={loading}
               >
                 <RefreshCw

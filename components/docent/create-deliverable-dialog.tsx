@@ -162,7 +162,7 @@ export function CreateDeliverableDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2" variant="outline">
+        <Button className="gap-2" variant="default">
           <Plus size={18} />
           Crear Entregable
         </Button>
@@ -240,7 +240,7 @@ export function CreateDeliverableDialog() {
 
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="default"
             onClick={() => setOpen(false)}
             disabled={loading}
           >

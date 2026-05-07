@@ -200,7 +200,7 @@ export function UploadDeliverableDialog({
         {/* Botones de acción */}
         <div className="flex gap-3 justify-end">
           <Button
-            variant="outline"
+            variant="default"
             onClick={() => onOpenChange(false)}
             disabled={uploading}
           >

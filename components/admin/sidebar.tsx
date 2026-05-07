@@ -37,11 +37,8 @@ const menuItems = [
 
 export function AdminSidebar() {
   const { data: session } = useSession();
-
   const { state } = useSidebar();
-
   const pathname = usePathname();
-
   const userEmail = session?.user?.email || "";
 
   const handleLogout = () => {

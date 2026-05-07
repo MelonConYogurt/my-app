@@ -155,7 +155,7 @@ export function DeliverableCard({
         {deliverable.status === "submitted" && (
           <Button
             onClick={() => setIsUploadDialogOpen(true)}
-            variant="outline"
+            variant="default"
             className="w-full"
             size="sm"
           >
@@ -173,7 +173,7 @@ export function DeliverableCard({
         {deliverable.status === "rejected" && (
           <Button
             onClick={() => setIsUploadDialogOpen(true)}
-            variant="outline"
+            variant="default"
             className="w-full"
             size="sm"
           >

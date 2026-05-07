@@ -117,7 +117,7 @@ function Rubrics() {
             <div className="flex gap-2">
               <Button
                 onClick={handleRefresh}
-                variant="outline"
+                variant="default"
                 disabled={loading}
               >
                 <RefreshCw

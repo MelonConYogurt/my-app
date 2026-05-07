@@ -9,7 +9,7 @@ export default function TeacherLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AdminSidebar />
       <SidebarInset className="bg-background">{children}</SidebarInset>
     </SidebarProvider>

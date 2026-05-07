@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,7 +17,22 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, X } from "lucide-react";
+
+import {
+  Plus,
+  Trash2,
+  Save,
+  X,
+  AlertCircle,
+  Award,
+  CheckCircle2,
+  ClipboardList,
+  ListChecks,
+  Loader2,
+  Percent,
+  PlusCircle,
+  Edit,
+} from "lucide-react";
 
 type RubricCriterion = {
   name: string;
@@ -31,29 +46,41 @@ type RubricFormData = {
   criterions: RubricCriterion[];
 };
 
+const emptyCriterion: RubricCriterion = {
+  name: "",
+  value: 0,
+  description: "",
+};
+
 export function CreateRubricDialog({ docentId }: { docentId: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isCriterionFormOpen, setIsCriterionFormOpen] = useState(false);
+  const [rubricsTotalRating, setRubricsTotalRating] = useState(0);
+  const [criterionFormOpen, setCriterionFormOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const [currentCriterion, setCurrentCriterion] =
+    useState<RubricCriterion>(emptyCriterion);
+
   const [formData, setFormData] = useState<RubricFormData>({
     title: "",
     description: "",
     criterions: [],
   });
 
-  const [newCriterion, setNewCriterion] = useState<RubricCriterion>({
-    name: "",
-    value: 0,
-    description: "",
-  });
-
-  const router = useRouter();
+  useEffect(() => {
+    setRubricsTotalRating(
+      formData.criterions.reduce((acc, item) => acc + item.value, 0),
+    );
+  }, [formData]);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -64,41 +91,62 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
-    setNewCriterion((prev) => ({
+
+    setCurrentCriterion((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "value" ? Number(value) : value,
     }));
   }
 
-  function addCriterion() {
-    if (!newCriterion.name || !newCriterion.description) {
+  function openCreateCriterionForm() {
+    setEditingIndex(null);
+    setCurrentCriterion(emptyCriterion);
+    setCriterionFormOpen(true);
+  }
+
+  function closeCriterionForm() {
+    setCriterionFormOpen(false);
+    setEditingIndex(null);
+    setCurrentCriterion(emptyCriterion);
+  }
+
+  function handleEditCriterion(index: number) {
+    setEditingIndex(index);
+    setCurrentCriterion(formData.criterions[index]);
+    setCriterionFormOpen(true);
+  }
+
+  function saveCriterion() {
+    if (
+      !currentCriterion.name ||
+      !currentCriterion.description ||
+      currentCriterion.value <= 0
+    ) {
       toast.error("Completa todos los campos del criterio");
       return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      criterions: [
-        ...prev.criterions,
-        {
-          name: newCriterion.name,
-          value: newCriterion.value,
-          description: newCriterion.description,
-        },
-      ],
-    }));
+    if (editingIndex !== null) {
+      const updatedCriterions = [...formData.criterions];
 
-    setNewCriterion({
-      name: "",
-      value: 0,
-      description: "",
-    });
+      updatedCriterions[editingIndex] = currentCriterion;
 
-    handleisCriterionFormOpen();
-  }
+      setFormData((prev) => ({
+        ...prev,
+        criterions: updatedCriterions,
+      }));
 
-  function handleisCriterionFormOpen() {
-    setIsCriterionFormOpen((prev) => !prev);
+      toast.success("Criterio actualizado");
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        criterions: [...prev.criterions, currentCriterion],
+      }));
+
+      toast.success("Criterio agregado");
+    }
+
+    closeCriterionForm();
   }
 
   function removeCriterion(index: number) {
@@ -108,17 +156,29 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
     }));
   }
 
-  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    console.log("Se estan enviado los siguiente datos al endpoint: ", formData);
-
     try {
-      if (!formData.title || !formData.description) {
-        setError("El título y descripción son obligatorios");
-        setLoading(false);
+      if (!formData.title) {
+        setError("El título es obligatorio");
+        return;
+      }
+
+      if (!formData.description) {
+        setError("La descripción es obligatoria");
+        return;
+      }
+
+      if (formData.criterions.length <= 0) {
+        setError("Debe existir al menos 1 criterio");
+        return;
+      }
+
+      if (rubricsTotalRating !== 100) {
+        setError("La suma total de las rúbricas debe ser 100");
         return;
       }
 
@@ -126,9 +186,11 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
         `${process.env.NEXT_PUBLIC_API_URL}/rubrics/create/`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            docentId: docentId,
+            docentId,
             title: formData.title,
             description: formData.description,
             criterions: formData.criterions,
@@ -143,7 +205,8 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
         return;
       }
 
-      toast.success("Rubrica creada");
+      toast.success("Rúbrica creada");
+
       router.refresh();
 
       setFormData({
@@ -152,16 +215,13 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
         criterions: [],
       });
 
-      setNewCriterion({
-        name: "",
-        value: 0,
-        description: "",
-      });
+      closeCriterionForm();
 
       setOpen(false);
     } catch (error) {
-      setError("Error al guardar la rúbrica");
       console.log(error);
+
+      setError("Error al guardar la rúbrica");
     } finally {
       setLoading(false);
     }
@@ -170,15 +230,19 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <Plus />
+        <Button variant="default" className="gap-2">
+          <Plus size={18} />
           Crear rúbrica
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Crear nueva rúbrica</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <ClipboardList className="h-5 w-5" />
+            Crear nueva rúbrica
+          </DialogTitle>
+
           <DialogDescription>
             Completa los campos para crear una nueva rúbrica
           </DialogDescription>
@@ -188,115 +252,152 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
           <FieldGroup>
             <Field>
               <Label htmlFor="title">Título</Label>
+
               <Input
                 id="title"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="Ej: Rúbrica de Calidad de Código"
-                required
+                placeholder="Ej: Rúbrica de calidad"
               />
             </Field>
 
             <Field>
               <Label htmlFor="description">Descripción</Label>
+
               <textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Describe los criterios generales de esta rúbrica"
+                placeholder="Descripción de la rúbrica"
                 className="w-full min-h-24 p-2 border border-input rounded-md bg-background"
-                required
               />
             </Field>
 
             <div className="border-t pt-4">
-              <Label className="font-semibold mb-4 block">Criterios</Label>
+              <div className="flex items-center justify-between">
+                <Label className="font-semibold flex items-center gap-2">
+                  <ListChecks className="h-4 w-4" />
+                  Criterios
+                </Label>
+
+                <p
+                  className={`text-sm font-medium flex items-center gap-1 ${
+                    rubricsTotalRating !== 100
+                      ? "text-red-500"
+                      : "text-green-500"
+                  }`}
+                >
+                  <Percent className="h-4 w-4" />
+                  Peso total: {rubricsTotalRating}%
+                </p>
+              </div>
 
               {formData.criterions.length > 0 && (
-                <div className="mb-4 space-y-2">
+                <div className="mt-4 space-y-2">
                   {formData.criterions.map((criterion, index) => (
                     <div
                       key={index}
                       className="flex items-start justify-between p-3 border rounded-md bg-muted/50"
                     >
                       <div className="flex-1">
-                        <p className="font-medium text-sm">{criterion.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="font-medium text-sm flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                          {criterion.name}
+                        </p>
+
+                        <p className="text-xs text-muted-foreground mt-1">
                           {criterion.description}
                         </p>
-                        <span className="inline-block mt-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded">
-                          Valor: {criterion.value}
+
+                        <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-primary/10 text-primary text-xs rounded">
+                          <Award className="h-3 w-3" />
+                          Valor: {criterion.value}%
                         </span>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCriterion(index)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+
+                      <div className="flex items-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditCriterion(index)}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <Edit size={16} />
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeCriterion(index)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {isCriterionFormOpen ? (
-                <div className="space-y-3 border p-3 rounded-md bg-muted/30">
-                  <div className="flex justify-between items-center ">
-                    <p className="text-sm font-medium w-full">
-                      Agregar criterio
+              {criterionFormOpen ? (
+                <div className="space-y-3 border p-4 rounded-md bg-muted/30 mt-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-medium flex items-center gap-2">
+                      <PlusCircle className="h-4 w-4" />
+
+                      {editingIndex !== null
+                        ? "Editar criterio"
+                        : "Agregar criterio"}
                     </p>
+
                     <Button
                       type="button"
-                      onClick={handleisCriterionFormOpen}
                       variant="destructive"
                       size="sm"
+                      onClick={closeCriterionForm}
                     >
                       <X size={16} />
                     </Button>
                   </div>
 
                   <Field>
-                    <Label htmlFor="criterionName" className="text-xs">
-                      Nombre del criterio
-                    </Label>
+                    <Label htmlFor="criterionName">Nombre del criterio</Label>
+
                     <Input
                       id="criterionName"
-                      value={newCriterion.name}
-                      name={"name"}
-                      onChange={(e) => handleCriterionChange(e)}
+                      name="name"
+                      value={currentCriterion.name}
+                      onChange={handleCriterionChange}
                       placeholder="Ej: Legibilidad"
                     />
                   </Field>
 
                   <Field>
-                    <Label htmlFor="criterionValue" className="text-xs">
-                      Valor (puntos)
-                    </Label>
+                    <Label htmlFor="criterionValue">Valor del criterio</Label>
+
                     <Input
                       id="criterionValue"
                       type="number"
-                      value={newCriterion.value}
-                      name={"value"}
-                      onChange={(e) => handleCriterionChange(e)}
-                      min="0"
-                      max="100"
+                      name="value"
+                      value={currentCriterion.value}
+                      onChange={handleCriterionChange}
+                      min={0}
+                      max={100}
                     />
                   </Field>
 
                   <Field>
-                    <Label htmlFor="criterionDesc" className="text-xs">
-                      Descripción
-                    </Label>
+                    <Label htmlFor="criterionDescription">Descripción</Label>
+
                     <textarea
-                      id="criterionDesc"
-                      value={newCriterion.description}
-                      name={"description"}
-                      onChange={(e) => handleCriterionChange(e)}
+                      id="criterionDescription"
+                      name="description"
+                      value={currentCriterion.description}
+                      onChange={handleCriterionChange}
                       placeholder="Describe este criterio"
                       className="w-full min-h-16 p-2 border border-input rounded-md bg-background text-sm"
                     />
@@ -304,31 +405,33 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
 
                   <Button
                     type="button"
-                    onClick={addCriterion}
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
+                    onClick={saveCriterion}
+                    variant="default"
+                    className="w-full gap-2"
                   >
-                    <Save size={16} className="mr-1" />
-                    Guardar criterio
+                    <Save size={16} />
+
+                    {editingIndex !== null
+                      ? "Guardar cambios"
+                      : "Agregar criterio"}
                   </Button>
                 </div>
               ) : (
                 <Button
                   type="button"
-                  onClick={handleisCriterionFormOpen}
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
+                  variant="default"
+                  className="w-full mt-4 gap-2"
+                  onClick={openCreateCriterionForm}
                 >
-                  <Plus size={16} className="mr-1" />
+                  <Plus size={16} />
                   Agregar criterio
                 </Button>
               )}
             </div>
 
             {error && (
-              <div className="rounded bg-red-50 p-2 text-sm text-red-600">
+              <div className="rounded bg-red-50 p-3 text-sm text-red-600 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
                 {error}
               </div>
             )}
@@ -336,13 +439,15 @@ export function CreateRubricDialog({ docentId }: { docentId: string }) {
 
           <DialogFooter className="mt-6">
             <DialogClose asChild>
-              <Button variant="outline" disabled={loading}>
+              <Button variant="default" disabled={loading}>
                 Cancelar
               </Button>
             </DialogClose>
 
-            <Button type="submit" disabled={loading}>
-              {loading ? "Creando..." : "Crear rubrica"}
+            <Button type="submit" disabled={loading} className="gap-2">
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+
+              {loading ? "Creando..." : "Crear rúbrica"}
             </Button>
           </DialogFooter>
         </form>
