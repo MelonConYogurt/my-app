@@ -289,7 +289,10 @@ export default function Deliverable() {
                         size="sm"
                         className="h-7 rounded-full text-xs"
                       >
-                        <Link href={deliverable.file} target="_blank">
+                        <Link
+                          href={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/view/${deliverable.file}`}
+                          target="_blank"
+                        >
                           <File size={16} />
                           PDF
                         </Link>

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,13 +27,6 @@ import {
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
-
-import { Document, Page, pdfjs } from "react-pdf";
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
 
 export type DeliverableStatus =
   | "pendiente"
@@ -95,17 +90,11 @@ const statusConfig = {
 function ViewMoreDeliverable({ data }: { data: Deliverable }) {
   const [file, setFile] = useState<File>();
   const [loading, setLoading] = useState(false);
-
-  const [numPages, setNumPages] = useState<number>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [viewPdf, setViewPdf] = useState(false);
 
   const config = statusConfig[data.status || "pendiente"];
   const { data: session } = useSession();
   const Icon = config.icon;
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
-    setNumPages(numPages);
-  }
 
   function handleInputFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setLoading(true);
@@ -195,7 +184,7 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl rounded-2xl">
+      <DialogContent className="sm:max-w-2xl rounded-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
             <div className="flex flex-col gap-3">
@@ -217,7 +206,9 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
               </p>
             </div>
           </DialogTitle>
+        </DialogHeader>
 
+        <div className="overflow-y-auto flex-1 pr-4">
           <DialogDescription asChild>
             <div className="flex flex-col gap-6 mt-4 text-sm">
               <div className="space-y-2">
@@ -283,17 +274,27 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
                   </p>
 
                   {data.file ? (
-                    <a
-                      href={data.file}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-emerald-600 hover:underline"
-                    >
-                      <div className="rounded-md bg-muted p-2">
-                        <Download size={18} />
-                      </div>
-                      Descargar archivo
-                    </a>
+                    <div className="flex flex-col gap-2">
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/download/${data.file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-emerald-600 hover:underline"
+                      >
+                        <div className="rounded-md bg-muted p-2">
+                          <Download size={18} />
+                        </div>
+                        Descargar archivo
+                      </a>
+                      <Button
+                        variant={viewPdf ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setViewPdf(!viewPdf)}
+                        className="w-full"
+                      >
+                        {viewPdf ? "Ver detalles" : "Ver PDF"}
+                      </Button>
+                    </div>
                   ) : (
                     <p className="text-muted-foreground">
                       No hay archivo adjunto
@@ -302,18 +303,19 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
                 </div>
               </div>
 
-              {data.file ? (
-                <div>
-                  <Document
-                    file={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/download/${data.file}`}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                  >
-                    <Page pageNumber={pageNumber} />
-                  </Document>
-                  <p>
-                    Page {pageNumber} of {numPages}
-                  </p>
+              {viewPdf && data.file && (
+                <div className="border rounded-xl overflow-hidden">
+                  <iframe
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/view/${data.file}`}
+                    className="w-full h-125"
+                    title="PDF Viewer"
+                    allow="fullscreen"
+                  />
                 </div>
+              )}
+
+              {data.file ? (
+                <></>
               ) : (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Subir entrega</Label>
@@ -362,7 +364,7 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
               </div>
             </div>
           </DialogDescription>
-        </DialogHeader>
+        </div>
       </DialogContent>
     </Dialog>
   );
