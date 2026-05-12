@@ -10,7 +10,6 @@ import {
   Clock3,
   Eye,
   Calendar,
-  ArrowRight,
   FileCheck,
   Award,
   File,
@@ -19,6 +18,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import ViewMoreDeliverable from "@/components/student/deliverables/view-more-deliverable";
 
 export type DeliverableStatus =
   | "pendiente"
@@ -26,17 +26,24 @@ export type DeliverableStatus =
   | "completado"
   | "rechazado";
 
+export interface Docent {
+  _id: string;
+  name: string;
+  email: string;
+}
+
 export interface Deliverable {
   _id?: string;
   title: string;
   description: string;
   dueDate: string;
   userId: string;
-  docentId: string;
+  docentId: Docent;
   status?: DeliverableStatus;
   file?: string;
   rubricId?: string;
   rating?: number;
+  feedback?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -307,15 +314,7 @@ export default function Deliverable() {
                           )}
                         </span>
                       </div>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="gap-2 text-xs font-semibold h-8"
-                      >
-                        Ver más
-                        <ArrowRight size={14} />
-                      </Button>
+                      <ViewMoreDeliverable data={deliverable} />
                     </div>
                   </div>
                 </div>
