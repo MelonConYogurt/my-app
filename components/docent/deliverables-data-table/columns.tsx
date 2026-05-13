@@ -1,7 +1,21 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import {
+  MoreHorizontal,
+  ArrowUpDown,
+  Eye,
+  FileX,
+  CheckCircle2,
+  Clock3,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +45,8 @@ export interface UserId {
   name: string;
   email: string;
 }
+
+type StatusKey = "completado" | "entregado" | "pendiente" | "rechazado";
 
 export const columns: ColumnDef<Deliverable>[] = [
   {
@@ -76,23 +92,48 @@ export const columns: ColumnDef<Deliverable>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-
-      const colors: Record<string, string> = {
-        pendiente: "bg-yellow-100 text-yellow-700",
-        entregado: "bg-blue-100 text-blue-700",
-        completado: "bg-green-100 text-green-700",
-        rechazado: "bg-red-100 text-red-700",
+      const statusConfig = {
+        completado: {
+          label: "Aprobado",
+          badge: "bg-emerald-500 text-white",
+          border: " border-emerald-500",
+          icon: CheckCircle2,
+          iconBg: "bg-emerald-500",
+        },
+        entregado: {
+          label: "En revisión",
+          badge: "bg-violet-500 text-white",
+          border: " border-violet-500",
+          icon: Eye,
+          iconBg: "bg-violet-500",
+        },
+        pendiente: {
+          label: "Pendiente",
+          badge: "bg-amber-500 text-white",
+          border: " border-amber-500",
+          icon: Clock3,
+          iconBg: "bg-amber-500",
+        },
+        rechazado: {
+          label: "Con correcciones",
+          badge: "bg-orange-500 text-white",
+          border: " border-orange-500",
+          icon: AlertTriangle,
+          iconBg: "bg-orange-500",
+        },
       };
 
+      const status = (row.original.status || "pendiente") as StatusKey;
+      const config = statusConfig[status];
+      const Icon = config.icon;
+
       return (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            colors[status] || "bg-gray-100 text-gray-700"
-          }`}
+        <div
+          className={`flex gap-2 px-3 py-2 items-center justify-center rounded-lg text-sm shadow-sm text-white font-medium ${config.iconBg} shrink-0 mr-8 rounded-md`}
         >
-          {status}
-        </span>
+          {config.label}
+          <Icon size={18} className="text-white" />
+        </div>
       );
     },
   },
@@ -110,12 +151,63 @@ export const columns: ColumnDef<Deliverable>[] = [
     cell: ({ row }) => {
       const file = row.getValue("file") as string | null;
 
-      if (!file) return "—";
+      if (!file)
+        return (
+          <div className="flex items-center gap-2 border border-red-200 bg-red-200 text-red-500 p-2 rounded-md ">
+            <p className="font-medium mx-2">No disponible</p>
+            <FileX size={20} />
+          </div>
+        );
 
       return (
-        <a href={file} target="_blank" className="text-blue-600 underline">
-          Ver archivo
-        </a>
+        <Dialog>
+          <DialogTrigger asChild>
+            <div className="flex gap-2 items-center border bg-blue-500 hover:bg-blue-600 transition-all text-white rounded-md px-4 py-2 font-medium cursor-pointer shadow-sm">
+              Ver documento <Eye size={20} />
+            </div>
+          </DialogTrigger>
+
+          <DialogContent
+            aria-describedby={undefined}
+            className="
+                w-[95vw]!
+                max-w-350!
+                h-[92vh]
+                p-0
+                overflow-hidden
+                rounded-2xl
+                border-0
+                bg-white
+                shadow-2xl
+                flex
+                flex-col
+              "
+          >
+            <div className="border-b bg-zinc-50 px-6 py-4 shrink-0">
+              <DialogTitle className="text-xl font-semibold text-zinc-900">
+                {row.original.title}
+              </DialogTitle>
+
+              <p className="text-sm text-zinc-500 mt-1">
+                {row.original.description || "Vista previa del documento"}
+              </p>
+            </div>
+
+            <div className="flex-1 bg-zinc-200 p-4 overflow-hidden">
+              <iframe
+                src={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/view/${row.original.file}`}
+                title="PDF Viewer"
+                className="
+                    w-full
+                    h-full
+                    rounded-xl
+                    bg-white
+                    shadow-lg
+                  "
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       );
     },
   },

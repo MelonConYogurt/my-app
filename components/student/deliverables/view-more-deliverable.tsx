@@ -4,14 +4,13 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertTriangle,
   ArrowRight,
@@ -60,28 +59,28 @@ const statusConfig = {
   completado: {
     label: "Aprobado",
     badge: "bg-emerald-500 text-white",
-    border: "border-t-4 border-emerald-500",
+    border: " border-emerald-500",
     icon: CheckCircle2,
     iconBg: "bg-emerald-500",
   },
   entregado: {
     label: "En revisión",
     badge: "bg-violet-500 text-white",
-    border: "border-t-4 border-violet-500",
+    border: " border-violet-500",
     icon: Eye,
     iconBg: "bg-violet-500",
   },
   pendiente: {
     label: "Pendiente",
     badge: "bg-amber-500 text-white",
-    border: "border-t-4 border-amber-500",
+    border: " border-amber-500",
     icon: Clock3,
     iconBg: "bg-amber-500",
   },
   rechazado: {
     label: "Con correcciones",
     badge: "bg-orange-500 text-white",
-    border: "border-t-4 border-orange-500",
+    border: " border-orange-500",
     icon: AlertTriangle,
     iconBg: "bg-orange-500",
   },
@@ -184,51 +183,65 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl rounded-2xl max-h-[90vh] flex flex-col">
+      <DialogContent
+        className={`${viewPdf ? " w-[95vw]! max-w-350! h-[92vh] p-5 flex flex-col" : "max-w-3xl! "}`}
+      >
         <DialogHeader>
-          <DialogTitle>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold">{data.title}</h2>
+          <div className={"flex items-start justify-between gap-4"}>
+            <div>
+              <DialogTitle className="text-2xl font-bold">
+                {data.title}
+              </DialogTitle>
 
-                <div
-                  className={`flex gap-2 px-3 py-2 items-center justify-center rounded-lg text-sm shadow-sm ${config.iconBg} shrink-0 mr-8`}
-                >
-                  {config.label}
-                  <Icon size={18} className="text-white" />
-                </div>
-              </div>
-
-              <hr />
-
-              <p className="text-sm text-gray-500 font-normal">
+              <p className="text-sm text-muted-foreground mt-1">
                 Detalles del entregable
               </p>
             </div>
-          </DialogTitle>
+
+            <div
+              className={`flex gap-2 px-4 py-2 items-center  text-sm font-medium text-white shadow-sm mr-5 rounded-md ${config.iconBg}`}
+            >
+              {config.label}
+              <Icon size={18} />
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="overflow-y-auto flex-1 pr-4">
-          <DialogDescription asChild>
-            <div className="flex flex-col gap-6 mt-4 text-sm">
-              <div className="space-y-2">
-                <p className="font-semibold text-black">Descripción</p>
+        <Tabs
+          defaultValue="details"
+          onValueChange={(value) => setViewPdf(value === "pdf")}
+          className="flex-1"
+        >
+          <div className="border-b py-3 bg-white ">
+            <TabsList className="grid w-full  grid-cols-2">
+              <TabsTrigger value="details">Detalles</TabsTrigger>
 
-                <div className="bg-muted rounded-xl p-4 text-muted-foreground leading-relaxed">
+              <TabsTrigger value="pdf" disabled={!data.file}>
+                Vista PDF
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="details">
+            <div className="space-y-6 max-w-5xl">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-base">Descripción</h3>
+
+                <div className="bg-muted rounded-md p-5 leading-relaxed text-muted-foreground">
                   {data.description}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="border rounded-xl p-4">
-                  <p className="font-medium text-red-500 mb-3">Fecha límite</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div className="border rounded-md p-5 space-y-4">
+                  <p className="font-semibold text-red-500">Fecha límite</p>
 
                   <div className="flex items-center gap-3">
-                    <div className="rounded-md bg-muted p-2">
-                      <Calendar size={18} />
+                    <div className="bg-muted rounded-xl p-3">
+                      <Calendar size={20} />
                     </div>
 
-                    <span className="text-red-500 font-medium">
+                    <span className="font-medium">
                       {new Date(data.dueDate).toLocaleDateString("es-ES", {
                         day: "2-digit",
                         month: "long",
@@ -238,63 +251,49 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
                   </div>
                 </div>
 
-                <div className="border rounded-xl p-4">
-                  <p className="font-medium text-yellow-500 mb-3">
-                    Calificación
-                  </p>
+                <div className="border rounded-md p-5 space-y-4">
+                  <p className="font-semibold text-yellow-500">Calificación</p>
 
                   <div className="flex items-center gap-3">
-                    <div className="rounded-md bg-muted p-2">
-                      <Star size={18} />
+                    <div className="bg-muted rounded-xl p-3">
+                      <Star size={20} />
                     </div>
 
-                    <span className="font-semibold text-black">
+                    <span className="font-medium">
                       {data.rating ? `${data.rating}/5` : "Sin calificar"}
                     </span>
                   </div>
                 </div>
 
-                <div className="border rounded-xl p-4">
-                  <p className="font-medium text-blue-500 mb-3">Docente</p>
+                <div className="border rounded-md p-5 space-y-4">
+                  <p className="font-semibold text-blue-500">Docente</p>
 
                   <div className="flex items-center gap-3">
-                    <div className="rounded-md bg-muted p-2">
-                      <User size={18} />
+                    <div className="bg-muted rounded-xl p-3">
+                      <User size={20} />
                     </div>
 
-                    <span className="font-medium text-black">
-                      {data.docentId?.name}
-                    </span>
+                    <span className="font-medium">{data.docentId?.name}</span>
                   </div>
                 </div>
 
-                <div className="border rounded-xl p-4">
-                  <p className="font-medium text-emerald-500 mb-3">
+                <div className="border rounded-md p-5 space-y-4">
+                  <p className="font-semibold text-emerald-500">
                     Archivo entregado
                   </p>
 
                   {data.file ? (
-                    <div className="flex flex-col gap-2">
-                      <a
-                        href={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/download/${data.file}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-emerald-600 hover:underline"
-                      >
-                        <div className="rounded-md bg-muted p-2">
-                          <Download size={18} />
-                        </div>
-                        Descargar archivo
-                      </a>
-                      <Button
-                        variant={viewPdf ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setViewPdf(!viewPdf)}
-                        className="w-full"
-                      >
-                        {viewPdf ? "Ver detalles" : "Ver PDF"}
-                      </Button>
-                    </div>
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/download/${data.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-emerald-600 hover:underline"
+                    >
+                      <div className="bg-muted rounded-xl p-3">
+                        <Download size={20} />
+                      </div>
+                      Descargar archivo
+                    </a>
                   ) : (
                     <p className="text-muted-foreground">
                       No hay archivo adjunto
@@ -303,31 +302,19 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
                 </div>
               </div>
 
-              {viewPdf && data.file && (
-                <div className="border rounded-xl overflow-hidden">
-                  <iframe
-                    src={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/view/${data.file}`}
-                    className="w-full h-125"
-                    title="PDF Viewer"
-                    allow="fullscreen"
-                  />
-                </div>
-              )}
-
-              {data.file ? (
-                <></>
-              ) : (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Subir entrega</Label>
+              {!data.file && (
+                <div className="space-y-4 border rounded-md p-5">
+                  <Label className="text-sm font-semibold">Subir entrega</Label>
 
                   <Input
                     type="file"
                     onChange={handleInputFileChange}
                     accept=".pdf"
                   />
+
                   <Button
                     className="w-full"
-                    size={"lg"}
+                    size="lg"
                     disabled={loading}
                     onClick={handleSendDeliverable}
                   >
@@ -339,15 +326,15 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
 
               {data.feedback && (
                 <div className="space-y-2">
-                  <p className="font-semibold text-black">Retroalimentación</p>
+                  <h3 className="font-semibold">Retroalimentación</h3>
 
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-orange-700">
+                  <div className="bg-orange-50 border border-orange-200 rounded-md p-5 text-orange-700">
                     {data.feedback}
                   </div>
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-muted-foreground border-t pt-4">
+              <div className="border-t pt-5 flex flex-col sm:flex-row justify-between text-xs text-muted-foreground">
                 <p>
                   Creado:{" "}
                   {data.createdAt
@@ -363,8 +350,18 @@ function ViewMoreDeliverable({ data }: { data: Deliverable }) {
                 </p>
               </div>
             </div>
-          </DialogDescription>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="pdf">
+            {data.file && (
+              <iframe
+                src={`${process.env.NEXT_PUBLIC_API_URL}/deliverables/view/${data.file}`}
+                className="w-full h-full"
+                title="PDF Viewer"
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
