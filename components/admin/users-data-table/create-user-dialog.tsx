@@ -38,6 +38,7 @@ export function CreateUserDialog() {
     name: "",
     email: "",
     password: "",
+    phone: "",
     role: "",
   });
 
@@ -87,6 +88,7 @@ export function CreateUserDialog() {
         name: "",
         email: "",
         password: "",
+        phone: "",
         role: "",
       });
 
@@ -168,6 +170,21 @@ export function CreateUserDialog() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
+              />
+            </Field>
+
+            {/* Teléfono */}
+            <Field>
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Teléfono
+              </Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Ej: +57 310 1234567"
               />
             </Field>
 

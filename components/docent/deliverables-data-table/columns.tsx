@@ -44,6 +44,7 @@ export interface UserId {
   _id: string;
   name: string;
   email: string;
+  phone: string;
 }
 
 type StatusKey = "completado" | "entregado" | "pendiente" | "rechazado";
@@ -73,6 +74,12 @@ export const columns: ColumnDef<Deliverable>[] = [
     accessorKey: "userId.name",
     header: "Estudiante",
     cell: ({ row }) => row.original.userId?.name || "—",
+  },
+  {
+    id: "userId.phone",
+    accessorKey: "userId.phone",
+    header: "Teléfono",
+    cell: ({ row }) => row.original.userId?.phone || "—",
   },
   {
     id: "userId.email",

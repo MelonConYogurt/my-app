@@ -37,6 +37,7 @@ export function EditUserDialog({ user }: { user: UserType }) {
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
+    phone: user.phone,
     role: user.role,
     active: user.active,
   });
@@ -155,6 +156,21 @@ export function EditUserDialog({ user }: { user: UserType }) {
                 onChange={handleChange}
                 placeholder="juan@example.com"
                 required
+              />
+            </Field>
+
+            {/* Teléfono */}
+            <Field>
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Teléfono
+              </Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Ej: +57 310 1234567"
               />
             </Field>
 

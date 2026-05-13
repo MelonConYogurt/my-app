@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Mail, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ export type User = {
   _id: string;
   name: string;
   email: string;
+  phone: string;
   active: boolean;
   role: string;
   CreatedAt: string;
@@ -26,6 +27,20 @@ export type User = {
 };
 
 export const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: "phone",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Teléfono
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+  },
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -112,26 +127,42 @@ export const columns: ColumnDef<User>[] = [
       const user = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
+        <div className="flex gap-2">
+          <div
+            onClick={() => (window.location.href = `mailto:${user.email}`)}
+            className="flex gap-2 px-3 py-2 items-center justify-center rounded-lg text-sm shadow-sm text-white font-medium bg-blue-500 cursor-pointer hover:bg-blue-600 transition-colors"
+          >
+            <Mail size={16} />
+            Correo
+          </div>
+          <div
+            onClick={() => (window.location.href = `tel:${user.phone}`)}
+            className="flex gap-2 px-3 py-2 items-center justify-center rounded-lg text-sm shadow-sm text-white font-medium bg-green-500 cursor-pointer hover:bg-green-600 transition-colors"
+          >
+            <Phone size={16} />
+            Llamar
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Abrir menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Más acciones</DropdownMenuLabel>
 
-            <DropdownMenuItem asChild>
-              <EditUserDialog user={user} />
-            </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <EditUserDialog user={user} />
+              </DropdownMenuItem>
 
-            <DropdownMenuItem asChild>
-              <AlertDialogDeleteUser _id={user._id} />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem asChild>
+                <AlertDialogDeleteUser _id={user._id} />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
   },
