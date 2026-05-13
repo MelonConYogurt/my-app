@@ -175,7 +175,7 @@ export const columns: ColumnDef<Deliverable>[] = [
                 h-[92vh]
                 p-0
                 overflow-hidden
-                rounded-2xl
+                rounded-md
                 border-0
                 bg-white
                 shadow-2xl
