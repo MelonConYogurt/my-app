@@ -100,12 +100,12 @@ export function StudentSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
+      <SidebarFooter className="border-t border-sidebar-border ">
         <div
           className={`flex transition-all duration-300 ${
             expanded
               ? "items-center gap-3"
-              : "flex-col items-center justify-center gap-3"
+              : "flex-col items-center justify-center"
           }`}
         >
           <Avatar className="h-9 w-9 shrink-0">

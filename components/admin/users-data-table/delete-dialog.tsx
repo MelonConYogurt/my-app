@@ -39,12 +39,11 @@ export function AlertDialogDeleteUser({ _id }: { _id: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <p className="flex gap-1 justify-start items-center text-sm p-1.5 bg-red-100 rounded-md cursor-default text-red-600 hover:bg-red-200">
-          Eliminar
-          <span>
-            <Trash size={14} />
-          </span>
-        </p>
+        <div className="flex gap-2 justify-start items-center text-sm p-2 bg-red-500 rounded-md cursor-default text-white hover:bg-red-600">
+          <Trash size={14} />
+
+          <p>Eliminar</p>
+        </div>
       </AlertDialogTrigger>
       <AlertDialogContent size="default">
         <AlertDialogHeader>

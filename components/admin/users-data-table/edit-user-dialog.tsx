@@ -105,12 +105,10 @@ export function EditUserDialog({ user }: { user: UserType }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <p className="flex gap-1 justify-start items-center text-sm p-1.5 bg-blue-100 rounded-md cursor-default text-blue-600 font mb-1 hover:bg-blue-200">
-          Editar
-          <span>
-            <Edit size={14} />
-          </span>
-        </p>
+        <div className="flex gap-2 justify-start items-center bg-blue-500 rounded-md cursor-default text-white font-medium  p-2 hover:bg-blue-600 ">
+          <Edit size={14} />
+          <p>Editar</p>
+        </div>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-sm">
@@ -126,7 +124,6 @@ export function EditUserDialog({ user }: { user: UserType }) {
 
         <form onSubmit={handleSubmit}>
           <FieldGroup>
-            {/* Nombre */}
             <Field>
               <Label htmlFor="name" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -142,7 +139,6 @@ export function EditUserDialog({ user }: { user: UserType }) {
               />
             </Field>
 
-            {/* Email */}
             <Field>
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
@@ -159,7 +155,6 @@ export function EditUserDialog({ user }: { user: UserType }) {
               />
             </Field>
 
-            {/* Teléfono */}
             <Field>
               <Label htmlFor="phone" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -174,7 +169,6 @@ export function EditUserDialog({ user }: { user: UserType }) {
               />
             </Field>
 
-            {/* Rol */}
             <Field className="w-full">
               <Label htmlFor="role" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
@@ -197,7 +191,6 @@ export function EditUserDialog({ user }: { user: UserType }) {
               </Select>
             </Field>
 
-            {/* Estado */}
             <Field className="w-full">
               <Label htmlFor="active" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
@@ -222,7 +215,6 @@ export function EditUserDialog({ user }: { user: UserType }) {
               </Select>
             </Field>
 
-            {/* Error */}
             {error && (
               <div className="rounded bg-red-50 p-2 text-sm text-red-600">
                 {error}
