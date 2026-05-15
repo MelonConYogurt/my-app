@@ -2,7 +2,6 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  MoreHorizontal,
   ArrowUpDown,
   Eye,
   FileX,
@@ -18,13 +17,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { RateDeliverableDialog } from "@/components/docent/deliverables-data-table/rate-deliverable-dialog";
 
 export interface Deliverable {
   _id: string;
@@ -33,8 +26,22 @@ export interface Deliverable {
   dueDate: string;
   userId: UserId;
   docentId: string;
+  rubricId?: string;
   status: string;
   grade?: number;
+  rating?: number;
+  feedback?: string;
+  comments?: Array<{
+    authorId:
+      | {
+          _id: string;
+          name: string;
+        }
+      | string;
+    role: "student" | "docent";
+    message: string;
+    createdAt: string;
+  }>;
   createdAt: string;
   updatedAt: string;
   file?: string | null;
@@ -145,11 +152,11 @@ export const columns: ColumnDef<Deliverable>[] = [
     },
   },
   {
-    accessorKey: "grade",
+    accessorKey: "rating",
     header: "Calificación",
     cell: ({ row }) => {
-      const grade = row.getValue("grade");
-      return grade ?? "Sin calificar";
+      const rating = row.getValue("rating");
+      return rating ? `${rating}/5` : "Sin calificar";
     },
   },
   {
@@ -160,7 +167,7 @@ export const columns: ColumnDef<Deliverable>[] = [
 
       if (!file)
         return (
-          <div className="flex items-center gap-2 border border-red-200 bg-red-200 text-red-500 p-2 rounded-md ">
+          <div className="flex items-center gap-2 border border-red-500 bg-red-500 text-white p-2 rounded-md ">
             <p className="font-medium mx-2">No disponible</p>
             <FileX size={20} />
           </div>
@@ -243,29 +250,17 @@ export const columns: ColumnDef<Deliverable>[] = [
     },
   },
   {
+    header: "Acciones",
     id: "actions",
     cell: ({ row }) => {
       const deliverable = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir menú</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(deliverable._id)}
-            >
-              Copiar ID
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <RateDeliverableDialog
+            deliverable={deliverable}
+          ></RateDeliverableDialog>
+        </div>
       );
     },
   },
